@@ -5,6 +5,9 @@ PRODUCT_PROPERTY_OVERRIDES += \
     ro.enable.native.bridge.exec=1 \
     ro.dalvik.vm.isa.arm64=x86_64 \
     ro.dalvik.vm.isa.arm=x86 \
-    ro.dalvik.vm.native.bridge=libnb.so \
+    ro.dalvik.vm.native.bridge=libndk_translation.so \
 
 $(call inherit-product, device/redroid-prebuilts/prebuilts_x86.mk)
+
+# Full GApps (MindTheGapps)
+$(call inherit-product, vendor/gapps/x86_64/x86_64-vendor.mk)

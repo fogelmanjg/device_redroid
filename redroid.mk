@@ -120,6 +120,7 @@ PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/handheld_core_hardware.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/handheld_core_hardware.xml \
     $(LOCAL_PATH)/redroid-removed-permissions.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/redroid-removed-permissions.xml \
     $(LOCAL_PATH)/init.redroid.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/init.redroid.rc \
+    $(LOCAL_PATH)/jg_netfix.sh:$(TARGET_COPY_OUT_VENDOR)/bin/jg_netfix.sh \
 
 # required by Settings
 PRODUCT_COPY_FILES += \
@@ -132,3 +133,15 @@ $(call inherit-product-if-exists, product.mk)
 $(call inherit-product, vendor/redroid/vendor.mk)
 
 $(call inherit-product, device/redroid-prebuilts/prebuilts.mk)
+
+# Native bridge (ARM-on-x86_64) guest runtime: builds the arm64 guest libs,
+# app_process64, linker64 and vdso from AOSP source. These are the open-source
+# counterpart designed to run under Google's proprietary libndk_translation.so
+# translator (added as prebuilts in device/redroid-prebuilts). TARGET_NATIVE_BRIDGE_ARCH
+# is already set in BoardConfig.mk; this pulls the guest packages into the image.
+# Use plain include (not inherit-product): native_bridge_support.mk only sets
+# plain make vars (NATIVE_BRIDGE_PRODUCT_PACKAGES), which with inherit-product
+# would be evaluated too late (deferred) and come back empty on the next line.
+include frameworks/libs/native_bridge_support/native_bridge_support.mk
+PRODUCT_PACKAGES += $(NATIVE_BRIDGE_PRODUCT_PACKAGES)
+PRODUCT_PACKAGES += $(NATIVE_BRIDGE_PRODUCT_PACKAGES_ARM)
