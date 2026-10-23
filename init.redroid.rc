@@ -1,9 +1,0 @@
-# jg-redroid: native root daemon for the fake-wifi patch's network setup (interface swap +
-# static IP self-heal). Runs as literal root via init directly - deliberately NOT invoked
-# through Magisk's su from system_server, which was found to break gralloc HAL resolution
-# (see jg_netfix.sh header for the full story). SELinux is disabled on this build, so no
-# seclabel is needed.
-service jg_netfix /system/bin/sh /vendor/bin/jg_netfix.sh
-    class core
-    user root
-    group root
