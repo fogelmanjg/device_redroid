@@ -48,7 +48,17 @@ while true; do
     fi
 
     if [ -e /sys/class/net/wlan0_fake ] && [ -n "$IP" ]; then
-        ip addr show wlan0 2>/dev/null | grep -q 'inet ' || ip addr add "$IP" dev wlan0 2>/dev/null
+        # jg-redroid: el chequeo original solo miraba si wlan0 tenia ALGUNA direccion inet,
+        # no si era la CORRECTA - si quedaba una direccion vieja/de otra instancia (ej. tras
+        # un docker recreate que le asigno una IP de bridge distinta a este contenedor), este
+        # check pasaba igual y la IP correcta nunca se agregaba. El host quedaba haciendo ARP
+        # para una IP que el contenedor nunca respondia, sin resolver jamas (no era timing,
+        # era una direccion mal puesta). Reproducido y confirmado 2026-07-28 en
+        # pvz2-fogelmajg. Fix: comparar contra la IP capturada puntualmente, no "cualquiera".
+        ip addr show wlan0 2>/dev/null | grep -qF "inet $IP" || {
+            ip addr flush dev wlan0 2>/dev/null
+            ip addr add "$IP" dev wlan0 2>/dev/null
+        }
         ip rule show 2>/dev/null | grep -q 'lookup main' || ip rule add priority 25000 lookup main 2>/dev/null
         ip route show 2>/dev/null | grep -q '^default' || ip route add default via "$GW" dev wlan0 2>/dev/null
         # jg-redroid: this shell's default umask leaves the file 0600 (root-only) - system_server
